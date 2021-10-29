@@ -3,70 +3,37 @@
 //  Memorize
 //
 //  Created by Mauricio Dias on 28/10/21.
-//
+//  View
 
 import SwiftUI
 
 struct ContentView: View {
-    var emojis = ["🎃", "👻", "🤡", "😸", "🐨", "🐸", "🐛", "🐈", "🦩", "🐼", "🐘" ,"🐶", "🦁", "🦧"]
-    @State var emojiCount = 14
-    
+    @ObservedObject var viewModel: EmojiMemoryGame
     
     var body: some View {
-        VStack {
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
-                    ForEach(emojis[0..<emojiCount], id: \.self) { emoji in
-                        CardView(content: emoji).aspectRatio(2/3, contentMode: .fit)
-                    }
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 65))]) {
+                ForEach(viewModel.cards) { card in
+                    CardView(card: card)
+                        .aspectRatio(2/3, contentMode: .fit)
+                        .onTapGesture {
+                            viewModel.choose(card)
+                        }
                 }
-                .foregroundColor(.red)
             }
-            Spacer()
-            HStack {
-                removeButton
-                Spacer()
-                addButton
-            }
-            .font(.largeTitle)
-            .padding(.horizontal)
         }
+        .foregroundColor(.red)
         .padding(.horizontal)
     }
-    
-    //MARK: - Component Views
-    var removeButton: some View {
-        Button {
-            if emojiCount > 1 {
-                emojiCount -= 1
-            }
-        } label: {
-            Image(systemName: "minus.circle")
-            
-        }
-    }
-    
-    var addButton: some View {
-        Button {
-            if emojiCount < emojis.count {
-                emojiCount += 1
-            }
-            
-        } label: {
-            Image(systemName: "plus.circle")
-            
-        }
-    }
-    
 }
 
 
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
-            .preferredColorScheme(.dark)
-.previewInterfaceOrientation(.portraitUpsideDown)
+        let game = EmojiMemoryGame()
+        ContentView(viewModel: game)
+
         
     }
 }
