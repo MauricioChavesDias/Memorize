@@ -9,37 +9,43 @@ import SwiftUI
 
 struct CardView: View {
     let card: EmojiMemoryGame.Card
-     
+    @State private var angleDegrees: Double  = 0.0
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                let shape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius, style: .continuous)
-                if card.isFaceUp {
-                    shape.fill().foregroundColor(.white)
-                    shape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
-                    Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 110-90))
-                        .padding(4)
-                        .opacity(0.5)
-                    Text(card.content).font(font(in: geometry.size))
-                        
-                } else if card.isMatched {
-                    shape.opacity(0)
-                } else {
-                    shape.fill()
-                }
+                Pie(startAngle: Angle(degrees: 0-90), endAngle: Angle(degrees: 110-90))
+                    .padding(4)
+                    .opacity(0.5)
+                
+                Text(card.content)
+                    .rotationEffect(Angle.degrees(angleDegrees))
+                    .font(font(in: geometry.size))
+                    .onAppear {
+                        animationWithCard(isMatched: card.isMatched)
+                    }
+                    .onChange(of: card.isMatched) { cardIsMatched in
+                        animationWithCard(isMatched: cardIsMatched)
+                    }
             }
+            .cardify(isFaceUp: card.isFaceUp)
         }
     }
     
-    private struct DrawingConstants {
-        static let cornerRadius: CGFloat = 10
-        static let lineWidth: CGFloat = 3
-        static let fontScale: CGFloat = 0.65
+    private func animationWithCard(isMatched: Bool) -> Void {
+        withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+            angleDegrees = isMatched ? 360 : 0
+        }
     }
-    
+
     private func font(in size: CGSize) -> Font {
         Font.system(size: min(size.width, size.height) * DrawingConstants.fontScale)
     }
+    
+    private struct DrawingConstants {
+        static let fontScale: CGFloat = 0.65
+    }
+    
 }
 
 
